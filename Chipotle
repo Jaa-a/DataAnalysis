@@ -1,0 +1,174 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
+# Gerekli kütüphaneler ekleniyor.
+import pandas as pd
+import matplotlib.pyplot as plt
+get_ipython().run_line_magic('matplotlib', 'inline')
+
+
+# ##### Dataset'i internetten indiriyoruz. Bu veri analizi için bu veri setini kullanabilirsiniz. <a href="https://raw.githubusercontent.com/justmarkham/DAT8/master/data/chipotle.tsv">Data<a>
+
+# In[2]:
+
+
+url = 'https://raw.githubusercontent.com/justmarkham/DAT8/master/data/chipotle.tsv'
+
+
+# ##### Url'imizi chipo isimli değişkene aktarıyoruz.
+
+# In[3]:
+
+
+chipo = pd.read_csv(url, sep='\t')
+
+
+# ##### Veri setinin ilk 5 satırını yazdırıyoruz.
+
+# In[4]:
+
+
+chipo
+
+
+# ##### En çok satılan 5 ürünün histogramını yapalım.
+
+# In[5]:
+
+
+grouped_item_name = chipo.groupby(['item_name'])
+most_sell_items = grouped_item_name.quantity.sum().sort_values(ascending=False).head(5)
+
+
+# In[6]:
+
+
+# Grafiği Oluşturuyoruz.
+most_sell_items.plot(kind = 'bar')
+# Başlıkları ekliyoruz.
+plt.xlabel('Items') # X ekseni ismi.
+plt.ylabel('Number of Times Ordered') # Y ekseni ismi.
+plt.title('Most Ordered Chipotle\'s Items') # Grafiğin ismi.
+#Grafiği bastırıyoruz.
+plt.show()
+
+
+# ##### Sipariş başına fiyatın saçılım grafiğini işliyoruz. Ürün fiyatının önünde dolar işareti olduğu için öncelikle işareti silmemiz gerekiyor.
+
+# In[7]:
+
+
+chipo.item_price = [float(value[1:-1]) for value in chipo.item_price]
+
+
+# ##### Sipariş ismine göre gruplandırma yapalım.
+
+# In[8]:
+
+
+orders = chipo.groupby('order_id').sum()
+
+
+# In[9]:
+
+
+##### Bir scatter plot oluşturuyoruz. s değişkeni yapılan noktalamaların büyüklüğünü gösteriyor. c değişkeni ise rengi gösteriyor.
+
+plt.scatter(x = orders.item_price, y = orders.quantity, s= 40, c='green')
+
+##### Sıra ise grafiği isimlendirmeye geldi.
+
+plt.xlabel('Order Price') # X ekseni ismi.
+plt.ylabel('Items Ordered') # Y ekseni ismi.
+plt.title('Number of items ordered per order price') # Grafiğin ismi.
+
+
+# ##### Menüyü oluşturalım.
+
+# In[10]:
+
+
+len(chipo.item_name.unique()) # Listedeki item_name sütunundaki benzersiz değerlerin sayısını bulduk.
+
+
+# In[11]:
+
+
+quantity_one = chipo[chipo["quantity"] == 1] # quantity_one değişkenine quantity sütununda 1' e
+#eşit değerleri aktardık.
+
+
+# In[12]:
+
+
+quantity_one = quantity_one.drop_duplicates(['item_name', 'quantity']) # item_name ve quantity sütunlarındaki
+# aynı değerli olanları siliyoruz.
+
+
+# In[13]:
+
+
+quantity_one.head(3) # ilk 3 satırı gösterme.
+
+
+# In[14]:
+
+
+quantity_one = quantity_one.drop(['order_id', 'quantity', 'choice_description'], axis = 1)
+# Menü için 'order_id', 'quantity', 'choice_description' ın gereksiz olduğunu düşündüğüm için kaldırdım.
+# Choice_description sütunu tercihe göre kalabilir.
+
+
+# In[15]:
+
+
+menu = quantity_one.sort_values(['item_name'], ascending=True).reset_index() 
+# Yukarıdaki adımdan sonra index sütununu düzenledik ve item_name sütununa göre sıralama yaptık.
+
+
+# In[16]:
+
+
+menu = menu.drop(['index'], axis=1)
+# İndex sütununu dataframe' e ekledi bu yüzden kaldırdık.
+
+
+# In[17]:
+
+
+menu.tail(5) # Menümüzün sonundan 5 satır bastırıyoruz.
+
+
+# ##### Başka bir adım olarak bir seferde verilen siparişlerden en yükseğini bulalım.
+
+# In[18]:
+
+
+order_id_grouped = chipo.groupby(['order_id'])
+
+
+# In[19]:
+
+
+order_id_grouped['item_price'].sum().sort_values(ascending = False)
+
+
+# In[20]:
+
+
+# Görüldüğü üzere 926. sipariş 205.25 dolarla tek seferde en yüksek siparişi vermiş. Ne siparişi verdiğini
+# yazdıralım.
+chipo[chipo['order_id'] == 926]
+# baya dükkanı masaya söylemiş.
+
+
+# #### Bu datayla ilgili aklıma gelenler bunlar lütfen sizin bir fikriniz varsa emre.ilcim@gmail.com adresine fikirlerinizi gönderin.
+
+# In[ ]:
+
+
+
+
